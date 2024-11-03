@@ -12,6 +12,20 @@ model = YOLO('v8.pt')  # Adjust the model name as needed
 # URL of the MJPEG camera feed
 MJPEG_URL = 'http://localhost:8080/my_camera'
 
+RECYCLABLE = ['cardboard_box', 'can', 'plastic_bottle_cap', 'plastic_bottle', 'reuseable_paper', 'plastic_bag', 'scrap_paper', 'stick', 'plastic_cup', 'snack_bag', 'plastic_box', 'straw', 'plastic_cup_lid', 'scrap_plastic', 'cardboard_bowl', 'plastic_cultery']
+COMPOST = ['chemical_plastic_bottle', 'chemical_plastic_gallon']
+TRASH = ['battery', 'chemical_spray_can', 'light_bulb', 'paint_bucket']
+
+def categorize_object(label):
+    if label in RECYCLABLE:
+        return "Recyclable"
+    elif label in COMPOST:
+        return "Compost"
+    elif label in TRASH:
+        return "Trash"
+    else:
+        return "Unknown"
+
 def gen_frames():
     camera = cv2.VideoCapture(MJPEG_URL)  # Use the MJPEG stream URL
     while True:
@@ -21,11 +35,38 @@ def gen_frames():
         else:
             # Perform detection
             results = model(frame)
+            detections = results[0].boxes
 
-            # Draw the results on the frame
-            annotated_frame = results[0].plot()
+            # Count occurrences of detected objects
+            detection_count = {}
+            for box in detections:
+                label = box.cls[0].item()
+                label_name = results[0].names[int(label)]
+                category = categorize_object(label_name)
 
-            ret, buffer = cv2.imencode('.jpg', annotated_frame)
+                if label_name in detection_count:
+                    detection_count[label_name]['count'] += 1
+                else:
+                    detection_count[label_name] = {'count': 1, 'category': category}
+
+            # Find the most detected object
+            most_detected_object = max(detection_count, key=lambda x: detection_count[x]['count'], default=None)
+
+            if most_detected_object is not None:
+                most_detected_category = detection_count[most_detected_object]['category']
+                print(f'Most Detected: {most_detected_object}, Category: {most_detected_category}')
+
+                # Draw only bounding boxes for the most detected object
+                for box in detections:
+                    label = box.cls[0].item()
+                    label_name = results[0].names[int(label)]
+
+                    if label_name == most_detected_object:
+                        # Draw the bounding box
+                        x1, y1, x2, y2 = map(int, box.xyxy[0])  # Get bounding box coordinates
+                        cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)  # Draw box in blue
+
+            ret, buffer = cv2.imencode('.jpg', frame)
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
@@ -48,14 +89,40 @@ def process_image():
 
     # Perform detection
     results = model(image)
-    # Draw the results on the image
-    annotated_image = results[0].plot()
+    detections = results[0].boxes
+    detection_count = {}
+
+    for box in detections:
+        label = box.cls[0].item()
+        label_name = results[0].names[int(label)]
+        category = categorize_object(label_name)
+
+        if label_name in detection_count:
+            detection_count[label_name]['count'] += 1
+        else:
+            detection_count[label_name] = {'count': 1, 'category': category}
+
+    # Find the most detected object
+    most_detected_object = max(detection_count, key=lambda x: detection_count[x]['count'], default=None)
+
+    if most_detected_object is not None:
+        most_detected_category = detection_count[most_detected_object]['category']
+        print(f'Most Detected: {most_detected_object}, Category: {most_detected_category}')
+
+        # Draw bounding boxes only for the most detected object
+        for box in detections:
+            label = box.cls[0].item()
+            label_name = results[0].names[int(label)]
+
+            if label_name == most_detected_object:
+                x1, y1, x2, y2 = map(int, box.xyxy[0])  # Get bounding box coordinates
+                cv2.rectangle(image, (x1, y1), (x2, y2), (255, 0, 0), 2)  # Draw box in blue
 
     # Convert the processed image to base64 for the response
-    _, buffer = cv2.imencode('.jpg', annotated_image)
+    _, buffer = cv2.imencode('.jpg', image)
     encoded_image = base64.b64encode(buffer).decode('utf-8')
 
-    return jsonify({'image': f'data:image/jpeg;base64,{encoded_image}'})
+    return jsonify({'image': f'data:image/jpeg;base64,{encoded_image}', 'most_detected': most_detected_object, 'category': most_detected_category})
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -65,14 +132,40 @@ def upload_file():
 
     # Perform detection
     results = model(image)
-    # Draw the results on the image
-    annotated_image = results[0].plot()
+    detections = results[0].boxes
+    detection_count = {}
+
+    for box in detections:
+        label = box.cls[0].item()
+        label_name = results[0].names[int(label)]
+        category = categorize_object(label_name)
+
+        if label_name in detection_count:
+            detection_count[label_name]['count'] += 1
+        else:
+            detection_count[label_name] = {'count': 1, 'category': category}
+
+    # Find the most detected object
+    most_detected_object = max(detection_count, key=lambda x: detection_count[x]['count'], default=None)
+
+    if most_detected_object is not None:
+        most_detected_category = detection_count[most_detected_object]['category']
+        print(f'Most Detected: {most_detected_object}, Category: {most_detected_category}')
+
+        # Draw bounding boxes only for the most detected object
+        for box in detections:
+            label = box.cls[0].item()
+            label_name = results[0].names[int(label)]
+
+            if label_name == most_detected_object:
+                x1, y1, x2, y2 = map(int, box.xyxy[0])  # Get bounding box coordinates
+                cv2.rectangle(image, (x1, y1), (x2, y2), (255, 0, 0), 2)  # Draw box in blue
 
     # Convert the processed image to base64 for the response
-    _, buffer = cv2.imencode('.jpg', annotated_image)
+    _, buffer = cv2.imencode('.jpg', image)
     encoded_image = base64.b64encode(buffer).decode('utf-8')
 
-    return jsonify({'image': f'data:image/jpeg;base64,{encoded_image}'})
+    return jsonify({'image': f'data:image/jpeg;base64,{encoded_image}', 'most_detected': most_detected_object, 'category': most_detected_category})
 
 if __name__ == '__main__':
     app.run(debug=True)
