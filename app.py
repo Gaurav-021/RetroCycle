@@ -2,38 +2,33 @@ import cv2
 import numpy as np
 from flask import Flask, render_template, request, jsonify, Response
 import base64
-from io import BytesIO
-from PIL import Image
+from ultralytics import YOLO
 
 app = Flask(__name__)
 
-# Initialize the camera
-camera = cv2.VideoCapture(0)
+# Load the YOLOv8 model
+model = YOLO('v8.pt')  # Adjust the model name as needed
 
-def classify_frame(frame):
-    # This function would contain your AI model logic
-    # For now, let's just simulate classification by returning a string
-    # Convert the frame to a string or label for the classification
-    # You would typically call your AI model here and return the classification
-    return "Classified as 'Recycling'"  # Placeholder classification
+# URL of the MJPEG camera feed
+MJPEG_URL = 'http://localhost:8080/my_camera'
 
-def generate_frames():
+def gen_frames():
+    camera = cv2.VideoCapture(MJPEG_URL)  # Use the MJPEG stream URL
     while True:
         success, frame = camera.read()
         if not success:
             break
-        
-        # Here you would process the frame with your AI detection logic
-        classification = classify_frame(frame)
+        else:
+            # Perform detection
+            results = model(frame)
 
-        # Optionally display classification text on the frame
-        cv2.putText(frame, classification, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
+            # Draw the results on the frame
+            annotated_frame = results[0].plot()
 
-        # Encode the frame in JPEG format
-        ret, buffer = cv2.imencode('.jpg', frame)
-        frame = buffer.tobytes()
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            ret, buffer = cv2.imencode('.jpg', annotated_frame)
+            frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
 @app.route('/')
 def index():
@@ -41,38 +36,47 @@ def index():
 
 @app.route('/video_feed')
 def video_feed():
-    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/process_image', methods=['POST'])
 def process_image():
     data = request.json['image']
-    image_data = data.split(',')[1]
-    image = Image.open(BytesIO(base64.b64decode(image_data)))
+    header, encoded = data.split(',', 1)
+    image_data = base64.b64decode(encoded)
+    np_image = np.frombuffer(image_data, np.uint8)
+    image = cv2.imdecode(np_image, cv2.IMREAD_COLOR)
 
-    # Your image classification logic here
-    classification = classify_image(image)
+    # Perform detection
+    results = model(image)
+    # Draw the results on the image
+    annotated_image = results[0].plot()
 
-    return jsonify({'classification': classification})
+    # Convert the processed image to base64 for the response
+    _, buffer = cv2.imencode('.jpg', annotated_image)
+    encoded_image = base64.b64encode(buffer).decode('utf-8')
+
+    return jsonify({'image': f'data:image/jpeg;base64,{encoded_image}'})
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
     file = request.files['file']
-    image = Image.open(file)
+    in_memory_file = np.frombuffer(file.read(), np.uint8)
+    image = cv2.imdecode(in_memory_file, cv2.IMREAD_COLOR)
 
-    # Your image classification logic here
-    classification = classify_image(image)
+    # Perform detection
+    results = model(image)
+    # Draw the results on the image
+    annotated_image = results[0].plot()
 
-    return jsonify({'classification': classification})
+    # Convert the processed image to base64 for the response
+    _, buffer = cv2.imencode('.jpg', annotated_image)
+    encoded_image = base64.b64encode(buffer).decode('utf-8')
 
-def classify_image(image):
-    # Replace this with your actual classification logic
-    # For now, let's just return a placeholder
-    return "Classified as 'Recycling'"  # Replace with actual classification logic
+    return jsonify({'image': f'data:image/jpeg;base64,{encoded_image}'})
 
 if __name__ == '__main__':
     app.run(debug=True)
 
-# Release the camera when the app is closed
 @app.teardown_appcontext
 def teardown_camera(exception):
-    camera.release()
+    cv2.VideoCapture(MJPEG_URL).release()
