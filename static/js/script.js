@@ -13,6 +13,9 @@ const character = document.getElementById('pixel-character');
 const rightFacingImage = 'static/images/character_right.png';  
 const leftFacingImage = 'static/images/character_left.png';
 
+const achievementCheckpoint = { x: 304.5, y: 180 }; // Fixed coordinates for achievement
+
+
 // Get the initial position of the character from its DOM placement
 const rect = character.getBoundingClientRect();
 let charX = rect.left; // Start X position from current location
@@ -86,7 +89,8 @@ document.addEventListener('click', (event) => {
 });
 
 // Function to move character to target position
-function walkToTarget(targetX, targetY) {
+// Function to move character to target position and then execute a callback
+function walkToTarget(targetX, targetY, callback) {
     const speed = 7; // Adjust speed as desired
 
     walkInterval = setInterval(() => {
@@ -108,6 +112,11 @@ function walkToTarget(targetX, targetY) {
             charY = targetY;
             // Ensure the character image reflects the final direction
             character.src = lastDirection === 'right' ? rightFacingImage : leftFacingImage;
+
+            // Call the callback function after reaching the target
+            if (callback) {
+                callback();
+            }
         } else {
             // Calculate movement vector
             const moveX = (dx / distance) * speed;
@@ -120,6 +129,32 @@ function walkToTarget(targetX, targetY) {
             character.style.top = `${charY}px`;
         }
     }, 20); // Adjust interval timing for smoother movement
+}
+
+// Function to show achievement message
+function showAchievementMessage() {
+    // Create achievement message element
+    const achievementMessage = document.createElement('div');
+    achievementMessage.innerText = "Achievement Unlocked: \nFirst Recycling Item Collected!";
+    achievementMessage.className = 'achievement-popup'; // Add a class for styling
+    document.body.appendChild(achievementMessage);
+
+    // Position the message at the checkpoint
+    achievementMessage.style.position = 'absolute';
+    achievementMessage.style.left = '305px';
+    achievementMessage.style.top = `150px`;
+    achievementMessage.style.opacity = 1;
+
+    // Animate the message (fade out or slide up)
+    setTimeout(() => {
+        achievementMessage.style.transition = 'opacity 1s';
+        achievementMessage.style.opacity = 0;
+
+        // Remove the message after fading out
+        setTimeout(() => {
+            document.body.removeChild(achievementMessage);
+        }, 1000); // Wait for fade out to complete
+    }, 7000); // Show message for 1 second before fading out
 }
 
 // Capture photo from the live feed
@@ -246,5 +281,19 @@ function increaseCounter(bin) {
         let currentCount = parseInt(countElement.innerText, 10); // Get current count
         currentCount += 1; // Increment count
         countElement.innerText = currentCount; // Update the displayed count
+
+        // Check for the recycling achievement
+        if (bin === 'recycling' && currentCount === 1) {
+            unlockAchievement();
+        }
     }
+}
+
+// Function to unlock achievement
+function unlockAchievement() {
+    // Close the sorting screen
+    sortingScreen.style.display = 'none';
+
+    // Move character to the achievement checkpoint
+    walkToTarget(achievementCheckpoint.x, achievementCheckpoint.y, showAchievementMessage);
 }

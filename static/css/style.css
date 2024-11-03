@@ -69,6 +69,16 @@
     background-color: var(--button-hover-bg-color); /* Change background on hover */
 }
 
+.achievement-popup {
+    background-color: rgba(253, 184, 88, 0.8); /* Semi-transparent background */
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 16px;
+    z-index: 10; /* Make sure it appears above other elements */
+}
+
+
 @font-face {
     font-family: 'retro-font'; /* Name you want to give the font */
     src: url('../fonts/PressStart2P-vaV7.ttf') format('truetype'); /* Corrected path */
