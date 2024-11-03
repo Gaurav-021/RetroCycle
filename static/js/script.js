@@ -25,7 +25,39 @@ character.style.top = `${charY}px`;
 let walkInterval; // Store interval ID
 let lastDirection = 'left'; // Track the last direction
 
+// Add a flag to indicate if the modal is open
+let isModalOpen = false;
+
+// Open the sorting screen when the button is clicked
+openPopupButton.addEventListener('click', () => {
+    console.log("Open button clicked");
+    sortingScreen.style.display = 'block';
+    isModalOpen = true; // Set flag to true when modal is open
+    character.style.pointerEvents = 'none'; // Disable character interaction
+});
+
+// Close the modal
+closePopupButton.addEventListener('click', () => {
+    console.log("Close button clicked");
+    sortingScreen.style.display = 'none';
+    isModalOpen = false; // Set flag to false when modal is closed
+    character.style.pointerEvents = 'auto'; // Enable character interaction
+});
+
+// Close the modal when clicking outside of the modal content
+window.addEventListener('click', (event) => {
+    if (event.target === sortingScreen) {
+        sortingScreen.style.display = 'none';
+        isModalOpen = false; // Set flag to false when modal is closed
+        character.style.pointerEvents = 'auto'; // Enable character interaction
+    }
+});
+
+// Modify the click event listener for the document
 document.addEventListener('click', (event) => {
+    // Prevent character movement if the modal is open
+    if (isModalOpen) return;
+
     // Calculate center position of the character element
     const charWidth = character.offsetWidth;
     const charHeight = character.offsetHeight;
@@ -89,24 +121,6 @@ function walkToTarget(targetX, targetY) {
         }
     }, 20); // Adjust interval timing for smoother movement
 }
-
-// Open the sorting screen when the button is clicked
-openPopupButton.addEventListener('click', () => {
-    console.log("Open button clicked");
-    sortingScreen.style.display = 'block';
-});
-
-closePopupButton.addEventListener('click', () => {
-    console.log("Close button clicked");
-    sortingScreen.style.display = 'none';
-});
-
-// Close the modal when clicking outside of the modal content
-window.addEventListener('click', (event) => {
-    if (event.target === sortingScreen) {
-        sortingScreen.style.display = 'none';
-    }
-});
 
 // Capture photo from the live feed
 captureButton.addEventListener('click', () => {

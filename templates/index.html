@@ -14,22 +14,22 @@
 
     <!-- Counters Section -->
     <div id="counters">
-        <div class="counter" id="recycling-counter">
-            <img src="{{ url_for('static', filename='images/recycle_closed.png') }}" alt="Recycling" class="counter-icon">
-            <span id="recycling-count">0</span>
+        <div class="icon-container">
+            <div class="counter" id="recycling-counter">
+                <img src="{{ url_for('static', filename='images/recycle_closed.png') }}" alt="Recycling" class="counter-icon">
+                <span id="recycling-count">0</span>
+            </div>
+            <div class="counter" id="compost-counter">
+                <img src="{{ url_for('static', filename='images/compost_closed.png') }}" alt="Compost" class="counter-icon">
+                <span id="compost-count">0</span>
+            </div>
+            <div class="counter" id="trash-counter">
+                <img src="{{ url_for('static', filename='images/trash_closed.png') }}" alt="Trash" class="counter-icon">
+                <span id="trash-count">0</span>
+            </div>
         </div>
-        <div class="counter" id="compost-counter">
-            <img src="{{ url_for('static', filename='images/compost_closed.png') }}" alt="Compost" class="counter-icon">
-            <span id="compost-count">0</span>
-        </div>
-        <div class="counter" id="trash-counter">
-            <img src="{{ url_for('static', filename='images/trash_closed.png') }}" alt="Trash" class="counter-icon">
-            <span id="trash-count">0</span>
-        </div>
-        <button id="open-popup-button">Open Sorting Screen</button>
+        <button id="open-popup-button" class="button">Open Sorting Screen</button>
     </div>
-    
-    
 
     <!-- Popup Modal -->
     <div id="sorting-screen" class="modal">
@@ -39,7 +39,7 @@
                 <h2>Center Your Object Below.</h2>
                 <img id="video" width="480" height="360" src="{{ url_for('video_feed') }}" />
                 <h2>Then Click Sort!</h2>
-                <button id="capture-button">Sort Me!!!!</button>
+                <button id="capture-button" class="button">Sort Me!!!!</button>
                 <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
             </div>
 
