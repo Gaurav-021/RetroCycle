@@ -257,15 +257,21 @@ function sendImageToFlask(imageDataUrl) {
         animateBin(data.classification.toLowerCase()); // Call animate function based on classification
         
         // Update the corresponding counter
-        if (data.classification.toLowerCase() === 'recycling') {
-            recyclingCount++;
-            document.getElementById('recycling-count').textContent = recyclingCount;
-        } else if (data.classification.toLowerCase() === 'compost') {
-            compostCount++;
-            document.getElementById('compost-count').textContent = compostCount;
-        } else if (data.classification.toLowerCase() === 'trash') {
+        if (data.classification === null){
             trashCount++;
             document.getElementById('trash-count').textContent = trashCount;
+        }
+        else {
+            if (data.classification.toLowerCase() === 'Recyclable') {
+                recyclingCount++;
+                document.getElementById('recycling-count').textContent = recyclingCount;
+            } else if (data.classification.toLowerCase() === 'Compost') {
+                compostCount++;
+                document.getElementById('compost-count').textContent = compostCount;
+            } else if (data.classification.toLowerCase() === 'Trash') {
+                trashCount++;
+                document.getElementById('trash-count').textContent = trashCount;
+            }
         }
     })
     .catch((error) => {

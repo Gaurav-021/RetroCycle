@@ -47,14 +47,15 @@ def gen_frames():
                 if label_name in detection_count:
                     detection_count[label_name]['count'] += 1
                 else:
-                    detection_count[label_name] = {'count': 1, 'category': category}
+                    detection_count[label_name] = {'count': 1, 'classification': category}
 
             # Find the most detected object
             most_detected_object = max(detection_count, key=lambda x: detection_count[x]['count'], default=None)
 
+            most_detected_category = None
             if most_detected_object is not None:
-                most_detected_category = detection_count[most_detected_object]['category']
-                print(f'Most Detected: {most_detected_object}, Category: {most_detected_category}')
+                most_detected_category = detection_count[most_detected_object]['classification']
+                # print(f'Most Detected: {most_detected_object}, Category: {most_detected_category}') # DEBUG
 
                 # Draw only bounding boxes for the most detected object
                 for box in detections:
@@ -65,6 +66,10 @@ def gen_frames():
                         # Draw the bounding box
                         x1, y1, x2, y2 = map(int, box.xyxy[0])  # Get bounding box coordinates
                         cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)  # Draw box in blue
+
+                        # Add the label for the most detected object
+                        label_text = f"{most_detected_category}"
+                        cv2.putText(frame, label_text, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
             ret, buffer = cv2.imencode('.jpg', frame)
             frame = buffer.tobytes()
@@ -100,13 +105,14 @@ def process_image():
         if label_name in detection_count:
             detection_count[label_name]['count'] += 1
         else:
-            detection_count[label_name] = {'count': 1, 'category': category}
+            detection_count[label_name] = {'count': 1, 'classification': category}
 
     # Find the most detected object
     most_detected_object = max(detection_count, key=lambda x: detection_count[x]['count'], default=None)
 
+    most_detected_category = None
     if most_detected_object is not None:
-        most_detected_category = detection_count[most_detected_object]['category']
+        most_detected_category = detection_count[most_detected_object]['classification']
         print(f'Most Detected: {most_detected_object}, Category: {most_detected_category}')
 
         # Draw bounding boxes only for the most detected object
@@ -118,11 +124,19 @@ def process_image():
                 x1, y1, x2, y2 = map(int, box.xyxy[0])  # Get bounding box coordinates
                 cv2.rectangle(image, (x1, y1), (x2, y2), (255, 0, 0), 2)  # Draw box in blue
 
+                # Add the label for the most detected object
+                label_text = f"{most_detected_category}"
+                cv2.putText(image, label_text, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+
     # Convert the processed image to base64 for the response
     _, buffer = cv2.imencode('.jpg', image)
     encoded_image = base64.b64encode(buffer).decode('utf-8')
 
-    return jsonify({'image': f'data:image/jpeg;base64,{encoded_image}', 'most_detected': most_detected_object, 'category': most_detected_category})
+    return jsonify({
+        'image': f'data:image/jpeg;base64,{encoded_image}', 
+        'most_detected': most_detected_object, 
+        'classification': most_detected_category
+    })
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -143,13 +157,14 @@ def upload_file():
         if label_name in detection_count:
             detection_count[label_name]['count'] += 1
         else:
-            detection_count[label_name] = {'count': 1, 'category': category}
+            detection_count[label_name] = {'count': 1, 'classification': category}
 
     # Find the most detected object
     most_detected_object = max(detection_count, key=lambda x: detection_count[x]['count'], default=None)
 
+    most_detected_category = None
     if most_detected_object is not None:
-        most_detected_category = detection_count[most_detected_object]['category']
+        most_detected_category = detection_count[most_detected_object]['classification']
         print(f'Most Detected: {most_detected_object}, Category: {most_detected_category}')
 
         # Draw bounding boxes only for the most detected object
@@ -161,11 +176,19 @@ def upload_file():
                 x1, y1, x2, y2 = map(int, box.xyxy[0])  # Get bounding box coordinates
                 cv2.rectangle(image, (x1, y1), (x2, y2), (255, 0, 0), 2)  # Draw box in blue
 
+                # Add the label for the most detected object
+                label_text = f"{most_detected_category}"
+                cv2.putText(image, label_text, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+
     # Convert the processed image to base64 for the response
     _, buffer = cv2.imencode('.jpg', image)
     encoded_image = base64.b64encode(buffer).decode('utf-8')
 
-    return jsonify({'image': f'data:image/jpeg;base64,{encoded_image}', 'most_detected': most_detected_object, 'category': most_detected_category})
+    return jsonify({
+        'image': f'data:image/jpeg;base64,{encoded_image}', 
+        'most_detected': most_detected_object, 
+        'classification': most_detected_category
+    })
 
 if __name__ == '__main__':
     app.run(debug=True)
