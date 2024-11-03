@@ -5,7 +5,7 @@
     /* Primary Colors */
     --primary-bg-color: #ba9d88;      /* Background color */
     --primary-text-color: #867162;    /* Main text color */
-    --secondary-text-color: #f2f0e5;      /* Secondary text (headings, etc.) */
+    --secondary-text-color: #fefefe;   /* Secondary text (headings, etc.) */
     
     /* Accent Colors */
     --button-bg-color: #4CAF50;       /* Button background */
@@ -17,15 +17,69 @@
     --pixel-color-2: #dcdcdc;         /* Light gray (for backgrounds, bins, etc.) */
 }
 
+#counters {
+    position: fixed; /* Fix position relative to the viewport */
+    top: 10px; /* Adjust as needed for spacing from top */
+    left: 10px; /* Adjust as needed for spacing from left */
+    background: rgba(255, 255, 255, 0.8); /* Optional: make background semi-transparent */
+    padding: 10px; /* Add some padding for aesthetics */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Optional shadow for depth */
+    z-index: 1000; /* Ensure it's above other elements */
+    display: flex; /* Use flexbox for layout */
+    flex-direction: column; /* Stack items vertically */
+    align-items: center; /* Center items horizontally */
+    gap: 10px; /* Space between counters and button */
+}
+
+.counter {
+    display: flex;
+    flex-direction: column; /* Stack icon and count vertically */
+    align-items: center; /* Center icon and count */
+    font-size: 24px; /* Adjust size as needed */
+}
+
+#open-popup-button {
+    padding: 10px 20px; /* Button padding */
+    font-size: 20px; /* Adjust font size as needed */
+    background-color: var(--button-bg-color); /* Button background color */
+    color: white;
+    border: none;
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer;
+    font-family: 'retro-font', sans-serif;
+    text-align: center; /* Center text inside button */
+}
+
+button:hover {
+    background-color: var(--button-hover-bg-color); /* Button hover color */
+}
+
+.counter-icon {
+    width: 80px; /* Adjust icon size as needed */
+    height: auto;
+    margin-right: 10px; /* Space between icon and count */
+}
+
 @font-face {
     font-family: 'retro-font'; /* Name you want to give the font */
     src: url('../fonts/PressStart2P-vaV7.ttf') format('truetype'); /* Corrected path */
 }
 
+#pixel-character {
+    position: absolute; /* This allows us to control the character's position */
+    bottom: -300px;       /* Position the character at the bottom */
+    left: 360px;         /* Starting point from the left */
+    width: 150px;        /* Adjust size for a pixelated look */
+    height: auto;
+    image-rendering: pixelated; /* Keeps pixelated look on scaling */
+    z-index: 1; /* Ensure it’s above the background but below popups */
+}
+
 /* =============================
    Global Styles
    ============================= */
-   body {
+body {
     position: relative; /* Positioning context for pseudo-element */
     font-family: 'retro-font', sans-serif; 
     color: var(--primary-text-color);
@@ -44,7 +98,7 @@ body::before {
     background-size: cover; /* Cover the whole area */
     background-position: center; /* Center the image */
     background-repeat: no-repeat; /* Prevent repeating */
-    z-index: -1; /* Place it behind the main content */
+    z-index: -2; /* Place it behind the main content */
 }
 
 /* Gradient overlay to change opacity on the edges */
@@ -56,7 +110,7 @@ body::after {
     width: 100vw; /* Use viewport width */
     height: 100vh; /* Use viewport height */
     background: radial-gradient(circle, rgba(255, 255, 255, 0) 60%, rgba(255, 255, 255, 0.5) 100%);
-    z-index: 0; /* Make sure it's on top of the background */
+    z-index: -1; /* Make sure it's on top of the background */
 }
 
 /* Heading Style */
@@ -74,6 +128,12 @@ h1 {
     background-color: var(--pixel-color-2);
     border: 4px solid var(--border-color);
     border-radius: 10px;
+}
+
+/* Ensure main content sits above */
+.modal, h1, button, .bins {
+    position: relative;
+    z-index: 1; /* Ensures main content displays on top of background layers */
 }
 
 /* =============================
@@ -105,23 +165,6 @@ h1 {
     0% { transform: scaleY(1); }
     50% { transform: scaleY(1.2); }
     100% { transform: scaleY(1); }
-}
-
-/* =============================
-   Button Styles
-   ============================= */
-button {
-    padding: 10px 20px;
-    font-size: var(--button-font-size);
-    background-color: var(--button-bg-color);
-    color: white;
-    border: none;
-    cursor: pointer;
-    font-family: 'retro-font', sans-serif;
-}
-
-button:hover {
-    background-color: var(--button-hover-bg-color);
 }
 
 /* =============================

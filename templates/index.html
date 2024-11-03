@@ -8,7 +8,28 @@
 </head>
 <body>
     <h1>RetroCycle</h1>
-    <button id="open-popup-button">Open Sorting Screen</button>
+
+    <!-- Pixel Character -->
+    <img id="pixel-character" src="{{ url_for('static', filename='images/character_left.png') }}" alt="Pixel Character">
+
+    <!-- Counters Section -->
+    <div id="counters">
+        <div class="counter" id="recycling-counter">
+            <img src="{{ url_for('static', filename='images/recycle_closed.png') }}" alt="Recycling" class="counter-icon">
+            <span id="recycling-count">0</span>
+        </div>
+        <div class="counter" id="compost-counter">
+            <img src="{{ url_for('static', filename='images/compost_closed.png') }}" alt="Compost" class="counter-icon">
+            <span id="compost-count">0</span>
+        </div>
+        <div class="counter" id="trash-counter">
+            <img src="{{ url_for('static', filename='images/trash_closed.png') }}" alt="Trash" class="counter-icon">
+            <span id="trash-count">0</span>
+        </div>
+        <button id="open-popup-button">Open Sorting Screen</button>
+    </div>
+    
+    
 
     <!-- Popup Modal -->
     <div id="sorting-screen" class="modal">
@@ -50,7 +71,6 @@
             </div>
         </div>
     </div>
-
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
