@@ -17,6 +17,11 @@ const achievementCheckpoint = { x: 304.5, y: 180 }; // Fixed coordinates for ach
 let isAchievementAnimating = false;
 let allBinsUsedAchievementUnlocked = false;
 
+// Counter declarations
+let recyclingCount = 0;
+let compostCount = 0;
+let trashCount = 0;
+
 // Get the initial position of the character from its DOM placement
 const rect = character.getBoundingClientRect();
 let charX = rect.left; // Start X position from current location
@@ -234,11 +239,6 @@ fileInput.addEventListener('change', (event) => {
     reader.readAsDataURL(file);
 });
 
-// Declare counters
-let recyclingCount = 0;
-let compostCount = 0;
-let trashCount = 0;
-
 // Function to send the image to Flask
 function sendImageToFlask(imageDataUrl) {
     fetch('/process_image', {
@@ -323,28 +323,50 @@ function increaseCounter(bin) {
     const countElement = document.getElementById(`${bin}-count`);
 
     if (countElement) {
+        // Increment the global counter based on the bin clicked
+        if (bin === 'recycling') {
+            recyclingCount++; // Increment recycling count
+        } else if (bin === 'compost') {
+            compostCount++; // Increment compost count
+        } else if (bin === 'trash') {
+            trashCount++; // Increment trash count
+        }
+
+        // Get the current displayed count, parse it to an integer
         let currentCount = parseInt(countElement.innerText, 10); // Get current count
-        currentCount += 1; // Increment count
+        currentCount += 1; // Increment displayed count
         countElement.innerText = currentCount; // Update the displayed count
 
         // Check for the individual recycling achievement
         if (bin === 'recycling' && currentCount === 1) {
-            unlockAchievement();
+            unlockAchievement(); // Unlock achievement for the first recycling item
         }
+
+        // Log the current counts for debugging
+        console.log('Current Counts:', {
+            recyclingCount,
+            compostCount,
+            trashCount,
+            allBinsUsedAchievementUnlocked
+        });
 
         // Check for the "all bins used" achievement if not already unlocked
         if (!allBinsUsedAchievementUnlocked && recyclingCount >= 1 && compostCount >= 1 && trashCount >= 1) {
+            console.log("Unlocking all bins achievement"); // Log before unlocking
             allBinsUsedAchievementUnlocked = true; // Set the flag so it triggers only once
             unlockAllBinsAchievement(); // Call the new achievement function
+            console.log("All bins used achievement unlocked"); // Log after unlocking
         }
     }
 }
 
 function unlockAllBinsAchievement() {
     // Move character to the achievement checkpoint or a new location if desired
-    walkToTarget(achievementCheckpoint.x, achievementCheckpoint.y, () => {
+    sortingScreen.style.display = 'none';
+    walkToTarget(achievementCheckpoint.x + 1000, achievementCheckpoint.y, () => {
+        
         // Show a unique achievement message for the "all bins used" achievement
-        showCustomAchievementMessage("Achievement Unlocked: First Item in Each Bin!");
+        showAllBinsAchievementMessage("Achievement Unlocked: First Item in Each Bin!");
     });
 }
 
@@ -358,11 +380,43 @@ function unlockAchievement() {
     walkToTarget(achievementCheckpoint.x, achievementCheckpoint.y, showAchievementMessage);
 }
 
-function showCustomAchievementMessage(message) {
+function showAllBinsAchievementMessage(message) {
+    // Disable character movement during the achievement animation
+    isAchievementAnimating = true;
+
+    // Create GIF container for achievement
+    const achievementGifContainer = document.createElement('div');
+    achievementGifContainer.className = 'achievement-gif-popup'; // Add a class for styling
+    achievementGifContainer.style.position = 'absolute';
+    achievementGifContainer.style.left = `${achievementCheckpoint.x + 1230}px`;
+    achievementGifContainer.style.top = `${achievementCheckpoint.y}px`;
+    achievementGifContainer.style.opacity = 1;
+
+    // Create GIF element
+    const achievementGif = document.createElement('img');
+    achievementGif.src = 'static/images/stars.gif'; // Path to your GIF for "All Bins Used"
+    achievementGif.alt = 'All Bins Achievement GIF';
+    achievementGif.style.width = '100px';
+    achievementGif.style.height = 'auto';
+    achievementGifContainer.appendChild(achievementGif);
+
+    document.body.appendChild(achievementGifContainer);
+
+    // Wait for the GIF to finish
+    setTimeout(() => {
+        // Remove GIF after a delay
+        document.body.removeChild(achievementGifContainer);
+        
+        // Now show the achievement message
+        showAllBinsAchievementText(message);
+    }, 1000); // Adjust this delay to match the length of your GIF
+}
+
+function showAllBinsAchievementText(message) {
     const achievementMessageContainer = document.createElement('div');
     achievementMessageContainer.className = 'achievement-popup'; // Style class for the popup
     achievementMessageContainer.style.position = 'absolute';
-    achievementMessageContainer.style.left = `${achievementCheckpoint.x}px`;
+    achievementMessageContainer.style.left = `${achievementCheckpoint.x + 1200}px`;
     achievementMessageContainer.style.top = `${achievementCheckpoint.y - 35}px`; // Adjust as needed
     achievementMessageContainer.style.opacity = 1;
 
@@ -381,6 +435,9 @@ function showCustomAchievementMessage(message) {
         // Remove the message after fading out
         setTimeout(() => {
             document.body.removeChild(achievementMessageContainer);
+
+            // Re-enable character movement after the achievement sequence is complete
+            isAchievementAnimating = false;
         }, 1000); // Wait for fade out to complete
     }, 2000); // Show message for 1 second before fading out
 }
