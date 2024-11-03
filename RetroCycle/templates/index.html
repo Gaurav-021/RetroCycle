@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>RetroCycle</title>
+</head>
+<body>
+    <h1>RetroCycle</h1>
+    <button id="open-popup-button">Open Sorting Screen</button>
+
+    <!-- Popup Modal -->
+    <div id="sorting-screen" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-popup-button">&times;</span>
+            <div class="webcam-section">
+                <h2>Center Your Object Below.</h2>
+                <img id="video" width="480" height="360" src="{{ url_for('video_feed') }}" />
+                <h2>Then Click Sort!</h2>
+                <button id="capture-button">Sort Me!!!!</button>
+                <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+            </div>
+
+            <div class="bins">
+                <div class="bin" id="recycling-bin" onclick="animateBin('recycling')">
+                    <div class="bin-container">
+                        <img id="recycling-image" src="{{ url_for('static', filename='images/recycle_closed.png') }}" alt="Recycling Bin">
+                        <p>Recycling</p>
+                    </div>
+                </div>
+                <div class="bin" id="compost-bin" onclick="animateBin('compost')">
+                    <div class="bin-container">
+                        <img id="compost-image" src="{{ url_for('static', filename='images/compost_closed.png') }}" alt="Compost Bin">
+                        <p>Compost</p>
+                    </div>
+                </div>
+                <div class="bin" id="trash-bin" onclick="animateBin('trash')">
+                    <div class="bin-container">
+                        <img id="trash-image" src="{{ url_for('static', filename='images/trash_closed.png') }}" alt="Trash Bin">
+                        <p>Trash</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result">
+                <h2>Result:</h2>
+                <img id="result-image" src="" alt="Result" style="display:none;" />
+                <p id="classification-result"></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

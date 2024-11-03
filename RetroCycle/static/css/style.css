@@ -1,0 +1,171 @@
+/* =============================
+   Color Palette
+   ============================= */
+   :root {
+    /* Primary Colors */
+    --primary-bg-color: #ba9d88;      /* Background color */
+    --primary-text-color: #867162;    /* Main text color */
+    --secondary-text-color: #f2f0e5;      /* Secondary text (headings, etc.) */
+    
+    /* Accent Colors */
+    --button-bg-color: #4CAF50;       /* Button background */
+    --button-hover-bg-color: #45a049; /* Button hover background */
+    --border-color: #2f4f4f;          /* Border color */
+
+    /* Retro Theme Colors */
+    --pixel-color-1: #8b4513;         /* Dark brown (borders or shadows) */
+    --pixel-color-2: #dcdcdc;         /* Light gray (for backgrounds, bins, etc.) */
+}
+
+@font-face {
+    font-family: 'retro-font'; /* Name you want to give the font */
+    src: url('../fonts/PressStart2P-vaV7.ttf') format('truetype'); /* Corrected path */
+}
+
+/* =============================
+   Global Styles
+   ============================= */
+   body {
+    position: relative; /* Positioning context for pseudo-element */
+    font-family: 'retro-font', sans-serif; 
+    color: var(--primary-text-color);
+    text-align: center;
+    overflow: hidden; /* Prevent overflow of pseudo-element */
+}
+
+body::before {
+    content: ""; /* Required to display the pseudo-element */
+    position: fixed; /* Fixed position to cover the whole viewport */
+    top: 0;
+    left: 0;
+    width: 100vw; /* Use viewport width */
+    height: 100vh; /* Use viewport height */
+    background-image: url('../images/map.jpg'); /* Update with your image path */
+    background-size: cover; /* Cover the whole area */
+    background-position: center; /* Center the image */
+    background-repeat: no-repeat; /* Prevent repeating */
+    z-index: -1; /* Place it behind the main content */
+}
+
+/* Gradient overlay to change opacity on the edges */
+body::after {
+    content: "";
+    position: fixed; /* Fixed position for the overlay */
+    top: 0;
+    left: 0;
+    width: 100vw; /* Use viewport width */
+    height: 100vh; /* Use viewport height */
+    background: radial-gradient(circle, rgba(255, 255, 255, 0) 60%, rgba(255, 255, 255, 0.5) 100%);
+    z-index: 0; /* Make sure it's on top of the background */
+}
+
+/* Heading Style */
+h1 {
+    color: var(--secondary-text-color);
+    font-size: 90px;
+    margin-top: 50px;
+}
+
+/* Upload Section Styles */
+.upload-section {
+    margin-top: 20px;
+    display: inline-block;
+    padding: 20px;
+    background-color: var(--pixel-color-2);
+    border: 4px solid var(--border-color);
+    border-radius: 10px;
+}
+
+/* =============================
+   Bin Styles
+   ============================= */
+.bins {
+    display: flex;
+    justify-content: space-around; /* Align bins evenly */
+    margin: 20px 0;
+}
+
+.bin-container {
+    display: flex;                /* Enable flexbox for bin container */
+    flex-direction: column;       /* Stack items vertically */
+    align-items: center;          /* Center items horizontally */
+    text-align: center;           /* Center text */
+}
+
+.bin img {
+    width: 300px;                 /* Fixed size for images */
+    height: 350px;                /* Maintain aspect ratio */
+    margin-bottom: 10px;          /* Space between image and label */
+}
+
+/* =============================
+   Animation Styles
+   ============================= */
+@keyframes open-close {
+    0% { transform: scaleY(1); }
+    50% { transform: scaleY(1.2); }
+    100% { transform: scaleY(1); }
+}
+
+/* =============================
+   Button Styles
+   ============================= */
+button {
+    padding: 10px 20px;
+    font-size: var(--button-font-size);
+    background-color: var(--button-bg-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-family: 'retro-font', sans-serif;
+}
+
+button:hover {
+    background-color: var(--button-hover-bg-color);
+}
+
+/* =============================
+   Result Section
+   ============================= */
+.result {
+    margin-top: 20px;
+    font-size: 18px;
+    color: var(--primary-text-color);
+}
+
+/* =============================
+   Modal Styles
+   ============================= */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
