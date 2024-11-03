@@ -15,7 +15,7 @@ const leftFacingImage = 'static/images/character_left.png';
 
 const achievementCheckpoint = { x: 304.5, y: 180 }; // Fixed coordinates for achievement
 let isAchievementAnimating = false;
-
+let allBinsUsedAchievementUnlocked = false;
 
 // Get the initial position of the character from its DOM placement
 const rect = character.getBoundingClientRect();
@@ -321,18 +321,33 @@ function animateBin(bin) {
 // Function to increase the appropriate counter
 function increaseCounter(bin) {
     const countElement = document.getElementById(`${bin}-count`);
-    
+
     if (countElement) {
         let currentCount = parseInt(countElement.innerText, 10); // Get current count
         currentCount += 1; // Increment count
         countElement.innerText = currentCount; // Update the displayed count
 
-        // Check for the recycling achievement
+        // Check for the individual recycling achievement
         if (bin === 'recycling' && currentCount === 1) {
             unlockAchievement();
         }
+
+        // Check for the "all bins used" achievement if not already unlocked
+        if (!allBinsUsedAchievementUnlocked && recyclingCount >= 1 && compostCount >= 1 && trashCount >= 1) {
+            allBinsUsedAchievementUnlocked = true; // Set the flag so it triggers only once
+            unlockAllBinsAchievement(); // Call the new achievement function
+        }
     }
 }
+
+function unlockAllBinsAchievement() {
+    // Move character to the achievement checkpoint or a new location if desired
+    walkToTarget(achievementCheckpoint.x, achievementCheckpoint.y, () => {
+        // Show a unique achievement message for the "all bins used" achievement
+        showCustomAchievementMessage("Achievement Unlocked: First Item in Each Bin!");
+    });
+}
+
 
 // Function to unlock achievement
 function unlockAchievement() {
@@ -341,4 +356,31 @@ function unlockAchievement() {
 
     // Move character to the achievement checkpoint
     walkToTarget(achievementCheckpoint.x, achievementCheckpoint.y, showAchievementMessage);
+}
+
+function showCustomAchievementMessage(message) {
+    const achievementMessageContainer = document.createElement('div');
+    achievementMessageContainer.className = 'achievement-popup'; // Style class for the popup
+    achievementMessageContainer.style.position = 'absolute';
+    achievementMessageContainer.style.left = `${achievementCheckpoint.x}px`;
+    achievementMessageContainer.style.top = `${achievementCheckpoint.y - 35}px`; // Adjust as needed
+    achievementMessageContainer.style.opacity = 1;
+
+    // Create message text
+    const achievementText = document.createElement('p');
+    achievementText.innerText = message;
+    achievementMessageContainer.appendChild(achievementText);
+
+    document.body.appendChild(achievementMessageContainer);
+
+    // Animate the message (fade out)
+    setTimeout(() => {
+        achievementMessageContainer.style.transition = 'opacity 1s';
+        achievementMessageContainer.style.opacity = 0;
+
+        // Remove the message after fading out
+        setTimeout(() => {
+            document.body.removeChild(achievementMessageContainer);
+        }, 1000); // Wait for fade out to complete
+    }, 2000); // Show message for 1 second before fading out
 }
