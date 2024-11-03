@@ -14,6 +14,7 @@ const rightFacingImage = 'static/images/character_right.png';
 const leftFacingImage = 'static/images/character_left.png';
 
 const achievementCheckpoint = { x: 304.5, y: 180 }; // Fixed coordinates for achievement
+let isAchievementAnimating = false;
 
 
 // Get the initial position of the character from its DOM placement
@@ -58,8 +59,8 @@ window.addEventListener('click', (event) => {
 
 // Modify the click event listener for the document
 document.addEventListener('click', (event) => {
-    // Prevent character movement if the modal is open
-    if (isModalOpen) return;
+    // Prevent character movement if the modal is open or if an achievement animation is in progress
+    if (isModalOpen || isAchievementAnimating) return;
 
     // Calculate center position of the character element
     const charWidth = character.offsetWidth;
@@ -132,30 +133,74 @@ function walkToTarget(targetX, targetY, callback) {
 }
 
 // Function to show achievement message
+// Checkpoint coordinates
+// Function to show achievement GIF and then message
+// Function to show achievement GIF and then message
 function showAchievementMessage() {
-    // Create achievement message element
-    const achievementMessage = document.createElement('div');
-    achievementMessage.innerText = "Achievement Unlocked: \nFirst Recycling Item Collected!";
-    achievementMessage.className = 'achievement-popup'; // Add a class for styling
-    document.body.appendChild(achievementMessage);
+    // Disable character movement during the achievement animation
+    isAchievementAnimating = true;
 
-    // Position the message at the checkpoint
-    achievementMessage.style.position = 'absolute';
-    achievementMessage.style.left = '305px';
-    achievementMessage.style.top = `150px`;
-    achievementMessage.style.opacity = 1;
+    // Create GIF container
+    const achievementGifContainer = document.createElement('div');
+    achievementGifContainer.className = 'achievement-gif-popup'; // Add a class for styling
+    achievementGifContainer.style.position = 'absolute';
+    achievementGifContainer.style.left = `${achievementCheckpoint.x + 200}px`;
+    achievementGifContainer.style.top = `${achievementCheckpoint.y}px`;
+    achievementGifContainer.style.opacity = 1;
 
-    // Animate the message (fade out or slide up)
+    // Create GIF element
+    const achievementGif = document.createElement('img');
+    achievementGif.src = 'static/images/stars.gif'; // Path to your GIF
+    achievementGif.alt = 'Achievement GIF';
+    achievementGif.style.width = '100px'; // Set size as needed
+    achievementGif.style.height = 'auto'; // Maintain aspect ratio
+    achievementGifContainer.appendChild(achievementGif);
+
+    document.body.appendChild(achievementGifContainer);
+
+    // Wait for the GIF to finish (you may want to adjust the timing based on your GIF's duration)
     setTimeout(() => {
-        achievementMessage.style.transition = 'opacity 1s';
-        achievementMessage.style.opacity = 0;
+        // Remove GIF after a delay
+        document.body.removeChild(achievementGifContainer);
+        
+        // Now show the achievement message
+        showAchievementText();
+    }, 1000); // Adjust this delay to match the length of your GIF
+}
+
+function showAchievementText() {
+    isModalOpen = false;
+    console.log("Close button from achievement clicked");
+    // Create achievement message container
+    const achievementMessageContainer = document.createElement('div');
+    achievementMessageContainer.className = 'achievement-popup'; // Add a class for styling
+    achievementMessageContainer.style.position = 'absolute';
+    achievementMessageContainer.style.left = `${achievementCheckpoint.x}px`;
+    achievementMessageContainer.style.top = `${achievementCheckpoint.y - 35}px`; // Position above the GIF
+    achievementMessageContainer.style.opacity = 1;
+
+    // Create achievement message text
+    const achievementText = document.createElement('p');
+    achievementText.innerText = "Achievement Unlocked: First Recycling Item Collected!";
+    achievementMessageContainer.appendChild(achievementText);
+
+    document.body.appendChild(achievementMessageContainer);
+
+    // Animate the message (fade out)
+    setTimeout(() => {
+        achievementMessageContainer.style.transition = 'opacity 1s';
+        achievementMessageContainer.style.opacity = 0;
 
         // Remove the message after fading out
         setTimeout(() => {
-            document.body.removeChild(achievementMessage);
+            document.body.removeChild(achievementMessageContainer);
+
+            // Re-enable character movement after the achievement sequence is complete
+            isAchievementAnimating = false;
         }, 1000); // Wait for fade out to complete
-    }, 7000); // Show message for 1 second before fading out
+    }, 1000); // Show message for 1 second before fading out
 }
+
 
 // Capture photo from the live feed
 captureButton.addEventListener('click', () => {

@@ -32,6 +32,14 @@
     gap: 10px; /* Space between the icon container and the button */
 }
 
+.achievement-gif-popup {
+    z-index: 10; /* Ensure it appears above other elements */
+    display: flex; /* Use flexbox to center the GIF */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    scale: 1.5; /* Adjust the scale as needed */
+}
+
 .icon-container {
     display: flex; /* Enable horizontal stacking of icons */
     justify-content: center; /* Center icons in the container */
