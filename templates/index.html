@@ -15,9 +15,9 @@
     <!-- Counters Section -->
     <div id="counters">
         <div class="icon-container">
-            <div class="counter" id="recycling-counter">
+            <div class="counter" id="recycle-counter">
                 <img src="{{ url_for('static', filename='images/recycle_closed.png') }}" alt="Recycling" class="counter-icon">
-                <span id="recycling-count">0</span>
+                <span id="recycle-count">0</span>
             </div>
             <div class="counter" id="compost-counter">
                 <img src="{{ url_for('static', filename='images/compost_closed.png') }}" alt="Compost" class="counter-icon">
@@ -46,7 +46,7 @@
             <div class="bins">
                 <div class="bin" id="recycling-bin" onclick="animateBin('recycling')">
                     <div class="bin-container">
-                        <img id="recycling-image" src="{{ url_for('static', filename='images/recycle_closed.png') }}" alt="Recycling Bin">
+                        <img id="recycle-image" src="{{ url_for('static', filename='images/recycle_closed.png') }}" alt="Recycling Bin">
                         <p>Recycling</p>
                     </div>
                 </div>

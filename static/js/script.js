@@ -148,7 +148,7 @@ function showAchievementMessage() {
     // Create GIF container
     const achievementGifContainer = document.createElement('div');
     achievementGifContainer.className = 'achievement-gif-popup'; // Add a class for styling
-    achievementGifContainer.style.position = 'absolute';
+    achievementGifContainer.style.positioncompostCount = 'absolute';
     achievementGifContainer.style.left = `${achievementCheckpoint.x + 200}px`;
     achievementGifContainer.style.top = `${achievementCheckpoint.y}px`;
     achievementGifContainer.style.opacity = 1;
@@ -221,23 +221,29 @@ captureButton.addEventListener('click', () => {
     sendImageToFlask(imageDataUrl);
 });
 
-// Handle file uploads
-fileInput.addEventListener('change', (event) => {
-    const file = event.target.files[0];
-    if (!file) return; // Early return if no file is selected
+// // Handle file uploads
+// fileInput.addEventListener('change', (event) => {
+//     if (event != null){
+//         const file = event.target.files[0];
+//         if (!file) return; // Early return if no file is selected
+    
+//         const reader = new FileReader();
+//         reader.onload = function(e) {
+//             // Clear previous result before displaying new one
+//             resultImage.src = ''; // Clear previous image
+//             resultImage.src = e.target.result;
+//             resultImage.style.display = 'block';
+    
+//             sendFileToFlask(file);
+//         };
+    
+//         reader.readAsDataURL(file);
+//     }
+//     else {
+//         increaseCounter('trash');
+//     }
 
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        // Clear previous result before displaying new one
-        resultImage.src = ''; // Clear previous image
-        resultImage.src = e.target.result;
-        resultImage.style.display = 'block';
-
-        sendFileToFlask(file);
-    };
-
-    reader.readAsDataURL(file);
-});
+// });
 
 // Function to send the image to Flask
 function sendImageToFlask(imageDataUrl) {
@@ -254,7 +260,13 @@ function sendImageToFlask(imageDataUrl) {
     })
     .then(data => {
         classificationResult.textContent = data.classification; // Adjust based on your Flask response
-        animateBin(data.classification.toLowerCase()); // Call animate function based on classification
+        if (data.classification === null){
+            animateBin('trash'); // Call animate function based on classification
+        }
+        else {
+            animateBin(data.classification); // Call animate function based on classification
+        }
+        
         
         // Update the corresponding counter
         if (data.classification === null){
@@ -262,13 +274,13 @@ function sendImageToFlask(imageDataUrl) {
             document.getElementById('trash-count').textContent = trashCount;
         }
         else {
-            if (data.classification.toLowerCase() === 'Recyclable') {
+            if (data.classification.toLowerCase() === 'recycle') {
                 recyclingCount++;
-                document.getElementById('recycling-count').textContent = recyclingCount;
-            } else if (data.classification.toLowerCase() === 'Compost') {
+                document.getElementById('recycle-count').textContent = recyclingCount;
+            } else if (data.classification.toLowerCase() === 'compost') {
                 compostCount++;
                 document.getElementById('compost-count').textContent = compostCount;
-            } else if (data.classification.toLowerCase() === 'Trash') {
+            } else if (data.classification.toLowerCase() === 'trash') {
                 trashCount++;
                 document.getElementById('trash-count').textContent = trashCount;
             }
@@ -294,8 +306,14 @@ function sendFileToFlask(file) {
         return response.json();
     })
     .then(data => {
-        classificationResult.textContent = data.classification; // Adjust based on your Flask response
-        animateBin(data.classification.toLowerCase()); // Call animate function based on classification
+        if (data.classification === null){
+            classificationResult.textContent = 'trash'; // Adjust based on your Flask response
+            animateBin('trash'); // Call animate function based on classification
+        }
+        else {
+            classificationResult.textContent = data.classification; // Adjust based on your Flask response
+            animateBin(data.classification); // Call animate function based on classification
+        }        
     })
     .catch((error) => {
         console.error('Error:', error);
@@ -312,7 +330,7 @@ function animateBin(bin) {
     imgElement.src = imgElement.src.replace('_closed', '_open');
 
     // Increment the respective counter
-    increaseCounter(bin);
+    // increaseCounter(bin);
 
     // Optionally, you could add a class for additional CSS animations
     imgElement.classList.add('animate');
@@ -326,11 +344,11 @@ function animateBin(bin) {
 
 // Function to increase the appropriate counter
 function increaseCounter(bin) {
-    const countElement = document.getElementById(`${bin}-count`);
+    const countElement = document.getElementById('${bin}-counter');
 
     if (countElement) {
         // Increment the global counter based on the bin clicked
-        if (bin === 'recycling') {
+        if (bin === 'recycle') {
             recyclingCount++; // Increment recycling count
         } else if (bin === 'compost') {
             compostCount++; // Increment compost count
@@ -344,7 +362,8 @@ function increaseCounter(bin) {
         countElement.innerText = currentCount; // Update the displayed count
 
         // Check for the individual recycling achievement
-        if (bin === 'recycling' && currentCount === 1) {
+        if (bin === 'recycle' && (recyclingCount + compostCount) === 1) {
+            console.log("in achievement");
             unlockAchievement(); // Unlock achievement for the first recycling item
         }
 

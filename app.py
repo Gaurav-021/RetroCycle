@@ -18,11 +18,11 @@ TRASH = ['battery', 'chemical_spray_can', 'light_bulb', 'paint_bucket']
 
 def categorize_object(label):
     if label in RECYCLABLE:
-        return "Recyclable"
+        return "recycle"
     elif label in COMPOST:
-        return "Compost"
+        return "compost"
     elif label in TRASH:
-        return "Trash"
+        return "trash"
     else:
         return "Unknown"
 
